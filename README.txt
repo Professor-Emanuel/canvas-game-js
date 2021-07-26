@@ -14,4 +14,11 @@
 -Add restart button
 -Add start game button
 
+-Animation Library: GASP  https://greensock.com/gsap/
+                          https://cdnjs.com/libraries/gsap
+
+-CSS FrameWork:   https://tailwindcss.com/
+
+
+
 
