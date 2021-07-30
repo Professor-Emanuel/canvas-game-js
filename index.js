@@ -7,6 +7,9 @@ canvas.width = innerWidth;
 canvas.height = innerHeight;
 
 const scoreElement = document.querySelector('#scoreElement');
+const startGameButton = document.querySelector('#startGameButton');
+const modalElement = document.querySelector('#modalElement');
+const bigScoreElement = document.querySelector('#bigScoreElement');
 
 class Player{
     constructor(x, y, radius, color){
@@ -110,15 +113,27 @@ class Particle{
 const x = canvas.width / 2;
 const y = canvas.height / 2;
 
-const player = new Player(x, y, 10, 'white');
+let player = new Player(x, y, 10, 'white');
 console.log(canvas);
 console.log(ctx);
 console.log(player);
 
-// create a group of array and shoot them al at the same time
-const projectiles = [];
-const enemies = [];
-const particles = [];
+// create a group of array and shoot them al at the same time 
+//initially they were "const", but we need to be able to use them in the new function init()
+//so make them "let", the variable player above too!
+let projectiles = [];
+let enemies = [];
+let particles = [];
+
+function init(){
+    player = new Player(x, y, 10, 'white');
+    projectiles = [];
+    enemies = [];
+    particles = [];
+    score = 0;
+    scoreElement.innerHTML = score;
+    bigScoreElement.innerHTML = score;
+}
 
 function spawnEnemies(){
 
@@ -194,8 +209,11 @@ function animate(){
     enemies.forEach((enemy, index) =>{
         enemy.update();
         const distance = Math.hypot(player.x - enemy.x, player.y - enemy.y);
+        //game over
         if(distance - enemy.radius - player.radius < 1){
             cancelAnimationFrame(animationId);
+            modalElement.style.display = 'flex';
+            bigScoreElement.innerHTML = score;
         }
 
         projectiles.forEach( (projectile, projectileIndex )=>{
@@ -255,5 +273,9 @@ addEventListener('click', (event)=>{
 
 });
 
-animate();
-spawnEnemies();
+startGameButton.addEventListener('click', ()=>{
+    init();
+    animate();
+    spawnEnemies();
+    modalElement.style.display = 'none';
+});
