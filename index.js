@@ -7,6 +7,9 @@ canvas.width = innerWidth;
 canvas.height = innerHeight;
 
 const scoreElement = document.querySelector('#scoreElement');
+const startGameButton = document.querySelector('#startGameButton');
+const modalElement = document.querySelector('#modalElement');
+const bigScoreElement = document.querySelector('#bigScoreElement');
 
 class Player{
     constructor(x, y, radius, color){
@@ -110,15 +113,27 @@ class Particle{
 const x = canvas.width / 2;
 const y = canvas.height / 2;
 
-const player = new Player(x, y, 10, 'white');
+let player = new Player(x, y, 10, 'white');
 console.log(canvas);
 console.log(ctx);
 console.log(player);
 
-// create a group of array and shoot them al at the same time
-const projectiles = [];
-const enemies = [];
-const particles = [];
+// create a group of array and shoot them al at the same time 
+//initially they were "const", but we need to be able to use them in the new function init()
+//so make them "let", the variable player above too!
+let projectiles = [];
+let enemies = [];
+let particles = [];
+
+function init(){
+    player = new Player(x, y, 10, 'white');
+    projectiles = [];
+    enemies = [];
+    particles = [];
+    score = 0;
+    scoreElement.innerHTML = score;
+    bigScoreElement.innerHTML = score;
+}
 
 function spawnEnemies(){
 
@@ -154,6 +169,7 @@ projectile.update();
 */
 
 let animationId;
+let score = 0;
 
 // FUNCTION to animate
 function animate(){
@@ -193,8 +209,11 @@ function animate(){
     enemies.forEach((enemy, index) =>{
         enemy.update();
         const distance = Math.hypot(player.x - enemy.x, player.y - enemy.y);
+        //game over
         if(distance - enemy.radius - player.radius < 1){
             cancelAnimationFrame(animationId);
+            modalElement.style.display = 'flex';
+            bigScoreElement.innerHTML = score;
         }
 
         projectiles.forEach( (projectile, projectileIndex )=>{
@@ -205,10 +224,6 @@ function animate(){
             
             // when projectiles touch enemy
             if(distance - enemy.radius - projectile.radius < 1){
-
-                // increase our score 
-
-                
                 //create explosions
                 for(let i=0; i<enemy.radius * 2; i++){
                     particles.push(new Particle(projectile.x, 
@@ -217,13 +232,24 @@ function animate(){
                             y:(Math.random() - 0.5)* (Math.random()*6)}));
                 }
                 if(enemy.radius - 10 > 5){
+
+                    // increase our score 
+                    score += 100;
+                    scoreElement.innerHTML = score;
+
                     gsap.to(enemy, {
                         radius:enemy.radius - 10
                     });
+		    //use setTimeout, so when we remove an element graphics won't flicker
                     setTimeout( () =>{
                         projectiles.splice(projectileIndex, 1);
                     }, 0);
                 }else{
+                    //remove from scene altogether
+                    //increase our score a bit more
+                    score += 250;
+                    scoreElement.innerHTML = score;
+                    
                     setTimeout( () =>{
                         enemies.splice(index, 1);
                         projectiles.splice(projectileIndex, 1);
@@ -247,5 +273,9 @@ addEventListener('click', (event)=>{
 
 });
 
-animate();
-spawnEnemies();
+startGameButton.addEventListener('click', ()=>{
+    init();
+    animate();
+    spawnEnemies();
+    modalElement.style.display = 'none';
+});
